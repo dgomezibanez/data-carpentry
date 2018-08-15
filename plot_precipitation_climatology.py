@@ -1,4 +1,5 @@
 import argparse
+import pdb
 import iris
 import matplotlib.pyplot as plt
 import iris.plot as iplt
@@ -45,12 +46,26 @@ def plot_data(cube, gridlines=False, ticks=None):
         plt.gca().gridlines()
     cbar = plt.colorbar()
     cbar.set_label(str(cube.units))
-    cbar.set_tick(ticks)
-
+    #cbar.set_tick(ticks)
     #if (len(ticks)>2):
     #    print('Got some ticks {0}'.format(ticks))
     
     plt.title(cube.attributes['title'])
+
+
+
+def apply_mask(clim, mask):
+    print("Got Mask")
+    print(mask)
+    #pdb.set_trace()
+    sftlf_cube = iris.load_cube(mask[0], 'land_area_fraction')
+    if (mask[1] == 'land'):
+        chosen_mask = numpy.where(sftlf_cube.data < 50, True, False)
+    else :
+        chosen_mask = numpy.where(sftlf_cube.data > 50, True, False)
+    clim.data = numpy.ma.asarray(clim.data)
+    clim.data.mask = chosen_mask
+
 
 
 def main(inargs):
@@ -60,6 +75,8 @@ def main(inargs):
     cube = read_data(inargs.infile, inargs.month)    
     cube = convert_pr_units(cube)
     clim = cube.collapsed('time', iris.analysis.MEAN)
+    if (inargs.mask):
+        apply_mask(clim, inargs.mask)
     plot_data(clim, gridlines = inargs.gridlines, ticks = inargs.ticks)
     plt.savefig(inargs.outfile)
 
@@ -74,6 +91,12 @@ if __name__ == '__main__':
     parser.add_argument("--gridlines", help="add gridlines",
                     action="store_true")
     parser.add_argument('--ticks', nargs='*')
+
+    parser.add_argument("--mask", type=str, nargs=2,
+                    metavar=('SFTLF_FILE', 'REALM'), default=None,
+                    help='Apply a land or ocean mask (specify the realm to mask)')
+
+
 
     args = parser.parse_args()
     
