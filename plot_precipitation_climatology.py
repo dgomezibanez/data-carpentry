@@ -72,8 +72,15 @@ def main(inargs):
     """Run the program."""
     #print("ticks is {0}".format(inargs.ticks))
 
-    cube = read_data(inargs.infile, inargs.month)    
+    cube = read_data(inargs.infile, inargs.month)
+
+
     cube = convert_pr_units(cube)
+
+    assert (cube.data.min() >= 0) , "nonphysical negative rainfall"
+
+    assert (cube.data.max() < 1000) , "unlikely there's more than 1m per day"
+
     clim = cube.collapsed('time', iris.analysis.MEAN)
     if (inargs.mask):
         apply_mask(clim, inargs.mask)
