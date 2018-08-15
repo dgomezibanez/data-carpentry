@@ -45,9 +45,10 @@ def plot_data(cube, gridlines=False, ticks=None):
         plt.gca().gridlines()
     cbar = plt.colorbar()
     cbar.set_label(str(cube.units))
+    cbar.set_tick(ticks)
 
-    if (len(ticks)>2):
-        print('Got some ticks {0}'.format(ticks))
+    #if (len(ticks)>2):
+    #    print('Got some ticks {0}'.format(ticks))
     
     plt.title(cube.attributes['title'])
 
